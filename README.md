@@ -38,27 +38,27 @@ $ rspec --format RSpec::OrderedCommandFormatter --out log/rspec_command.txt
 
 In `.circleci/config.yml`:
 
-```yml
-      - run:
-          name: RSpec
-          command: |
-            mkdir -p $CIRCLE_TEST_REPORTS/rspec
-            bundle exec rspec \
-              --format RspecJunitFormatter --out $CIRCLE_TEST_REPORTS/rspec/rspec.xml \
-              --format RspecReproducibleOrderCommand --out log/rspec_command.txt \
-              --format progress \
-              $(circleci tests glob 'spec/**/*_spec.rb' | circleci tests split --split-by=timings | xargs)
-      - run:
-          name: Command for reproducible test run
-          when: on_fail
-          command: |
-            cat log/rspec_command.txt
-            #
-            # Use the following command to reproduce this exact RSpec run,
-            # with the same examples in the same order
-            # (you can triple-click to select the whole line):
-      - store_artifacts:
-          path: log
+```diff
+       - run:
+           name: RSpec
+           command: |
+             mkdir -p $CIRCLE_TEST_REPORTS/rspec
+             bundle exec rspec \
+               --format RspecJunitFormatter --out $CIRCLE_TEST_REPORTS/rspec/rspec.xml \
++              --format RSpec::OrderedCommandFormatter --out log/rspec_command.txt \
+               --format progress \
+               $(circleci tests glob 'spec/**/*_spec.rb' | circleci tests split --split-by=timings | xargs)
++       - run:
++           name: Command for reproducible test run
++           when: on_fail
++           command: |
++             cat log/rspec_command.txt
++             #
++             # Use the following command to reproduce this exact RSpec run,
++             # with the same examples in the same order
++             # (you can triple-click to select the whole line):
++       - store_artifacts:
++           path: log
 ```
 
 ## Development
