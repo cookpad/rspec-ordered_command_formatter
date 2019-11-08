@@ -1,5 +1,5 @@
 module Rspec
-  module OrderedCommandFormatter
+  class OrderedCommandFormatter
     VERSION = "0.1.0"
   end
 end

@@ -1,8 +1,9 @@
 require "rspec/ordered_command_formatter/version"
+
 RSpec::Support.require_rspec_core "formatters/base_formatter"
 
 module RSpec
-  class OrderedCommandFormatter
+  class OrderedCommandFormatter < Core::Formatters::BaseFormatter
     RSpec::Core::Formatters.register self, :seed, :dump_summary
 
     def seed(notification)
