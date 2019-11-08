@@ -1,28 +1,65 @@
-# Rspec::OrderedCommandFormatter
+# RSpec::OrderedCommandFormatter
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/rspec/ordered_command_formatter`. To experiment with that code, run `bin/console` for an interactive prompt.
+When running an RSpec suite in parallelized containers on a Continuous Integration platform, the suite's spec files are split in multiple groups, each one being run in one container.
 
-TODO: Delete this and the text above, and describe your gem
+In order to reproduce a given container's test run, one needs to know what examples ran, and what was the random seed.
+
+This formatter aims at making the process easier by producing a copy-pastable rspec command that includes the random seed and the list of examples.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'rspec-ordered_command_formatter'
+gem 'rspec-ordered_command_formatter', group: :test
 ```
 
 And then execute:
 
-    $ bundle
+```sh
+$ bundle
+```
 
 Or install it yourself as:
 
-    $ gem install rspec-ordered_command_formatter
+```sh
+$ gem install rspec-ordered_command_formatter
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+Simply pass the formatter to the `rspec` command's options. For example:
+
+```sh
+$ rspec --format RSpec::OrderedCommandFormatter --out log/rspec_command.txt
+```
+
+### Example on CircleCI
+
+In `.circleci/config.yml`:
+
+```yml
+      - run:
+          name: RSpec
+          command: |
+            mkdir -p $CIRCLE_TEST_REPORTS/rspec
+            bundle exec rspec \
+              --format RspecJunitFormatter --out $CIRCLE_TEST_REPORTS/rspec/rspec.xml \
+              --format RspecReproducibleOrderCommand --out log/rspec_command.txt \
+              --format progress \
+              $(circleci tests glob 'spec/**/*_spec.rb' | circleci tests split --split-by=timings | xargs)
+      - run:
+          name: Command for reproducible test run
+          when: on_fail
+          command: |
+            cat log/rspec_command.txt
+            #
+            # Use the following command to reproduce this exact RSpec run,
+            # with the same examples in the same order
+            # (you can triple-click to select the whole line):
+      - store_artifacts:
+          path: log
+```
 
 ## Development
 
@@ -32,4 +69,4 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/rspec-ordered_command_formatter.
+Bug reports and pull requests are welcome on GitHub at https://github.com/cookpad/rspec-ordered_command_formatter.
